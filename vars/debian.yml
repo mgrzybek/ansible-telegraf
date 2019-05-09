@@ -1,0 +1,11 @@
+---
+
+telegraf_repo_apt_url: "deb https://repos.influxdata.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+telegraf_repo_key_url: "https://repos.influxdata.com/influxdb.key"
+
+telegraf_distro_packages:
+  - telegraf
+
+telegraf_sysconfig: /etc/default
+
+telegraf_cluster_command: crm

@@ -1,0 +1,33 @@
+---
+
+- name: restart telegraf service
+  service: name=telegraf state=restarted enabled=yes
+  when:
+    - telegraf_post_config_restart_on_change | lower == 'true'
+    - telegraf_cluster_aware | lower == 'false'
+    - telegraf_use_docker | lower == 'false'
+
+- name: restart telegraf resource
+  shell: >
+    "{{ telegraf_cluster_command }} resource unmanage {{ telegraf_cluster_resource_name }} && \
+    systemctl restart telegraf.service && \
+    {{ telegraf_cluster_command }} resource manage {{ telegraf_cluster_resource_name }} && \
+    {{ telegraf_cluster_command }} resource enable {{ telegraf_cluster_resource_name }}"
+  when:
+    - telegraf_post_config_restart_on_change | lower == 'true'
+    - telegraf_cluster_aware | lower == 'true'
+
+- name: reload systemd
+  systemd: daemon-reload=yes
+
+- name: reload firewalld
+  command: firewall-cmd --reload
+
+- name: reload consul
+  command: "{{ consul_bin }} reload"
+
+- name: restart telegraf
+  service: name=telegraf state=restarted
+
+- name: delete repo key file
+  file: path="{{ repo_key_result.dest }}" state=absent

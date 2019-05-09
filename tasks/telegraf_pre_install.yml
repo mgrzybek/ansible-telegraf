@@ -1,0 +1,74 @@
+---
+
+- name: Set default facts
+  set_fact:
+    use_firewalld: false
+    configure_consul: false
+
+- name: Check running services
+  service_facts:
+
+- name: Check Consul configuration
+  when:
+    - telegraf_config_consul | lower == 'true'
+    - not ansible_facts.services.consul is defined
+  fail: msg="Consul service not found - Cannot configure it"
+
+- name: Check cluster configuration
+  when:
+    - telegraf_cluster_aware | lower == 'true'
+    - not ansible_facts.services.pacemaker is defined
+  fail: msg="Pacemaker service not found - Cannot configure it"
+
+- name: APT-based
+  when: ansible_os_family | lower == 'debian'
+  block:
+    - name: Get repo key
+      apt_key:
+        url: "{{ telegraf_repo_key_url }}"
+        state: present
+
+    - name: Create apt repo
+      apt_repository:
+        repo: "{{ telegraf_repo_apt_url }}"
+        state: present
+
+- name: RPM-based
+  when: ansible_os_family | lower == 'redhat'
+  block:
+    - name: Create yum repo
+      yum_repository:
+        name: telegraf
+        description: telegraf repo
+        baseurl: "{{ telegraf_repo_rpm_url }}"
+        gpgkey: "{{ telegraf_repo_key }}"
+
+- name: Set local fact - Configure firewalld
+  when: ansible_facts.services.firewalld is defined
+  set_fact:
+    use_firewalld: true
+
+- name: Get Consul details
+  when:
+    - telegraf_config_consul | lower == 'true'
+    - ansible_facts.services.consul is defined
+  block:
+    - name: Get Consul service details
+      systemd: name=consul
+      register: consul_systemd
+
+    - name: Set Consul facts
+      set_fact:
+        consul_bin: "{{ systemd_result.status.ExecStart | regex_replace('^.+path=(.+?)\\s+.+?$','\\1') }}"
+        configure_consul: true
+
+- name: Cluster-aware facts
+  when: telegraf_cluster_aware | lower == 'true'
+  block:
+    - name: Get crm node name
+      command: crm_node -n
+      register: crm_result
+
+    - name: Set cluster facts
+      set_fact:
+        crm_node_name: "{{ crm_result.stdout }}"

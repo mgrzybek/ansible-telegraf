@@ -1,0 +1,11 @@
+---
+
+telegraf_repo_rpm_url: "https://repos.influxdata.com/rhel/$releasever/$basearch/stable"
+telegraf_repo_key_url: "https://repos.influxdata.com/influxdb.key"
+
+telegraf_distro_packages:
+  - telegraf
+
+telegraf_sysconfig: /etc/sysconfig
+
+telegraf_cluster_command: pcs

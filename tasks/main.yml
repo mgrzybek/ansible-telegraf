@@ -1,0 +1,24 @@
+---
+# tasks file for ansible-telegraf
+
+- name: Variables by OS
+  include_vars: "{{ item }}"
+  tags: always
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+
+- import_tasks: telegraf_pre_install.yml
+  tags:
+    - telegraf-pre-install
+
+- import_tasks: telegraf_install.yml
+  tags:
+    - telegraf-install
+
+- import_tasks: telegraf_post_install.yml
+  tags:
+    - telegraf-post-install

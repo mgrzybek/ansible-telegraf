@@ -1,0 +1,62 @@
+---
+
+- name: Configure telegraf
+  template: src={{ item.source }} dest={{ item.destination }}
+  with_items:
+    - source: telegraf.conf.j2
+      destination: /etc/telegraf/telegraf.conf
+    - source: output.conf.j2
+      destination: /etc/telegraf/telegraf.d/output.conf
+  notify:
+    - restart telegraf service
+    - restart telegraf resource
+
+- name: Configure telegraf inputs (system)
+  when: telegraf_configure_input_system | lower == 'true'
+  template: src={{ item.source }} dest={{ item.destination }}
+  with_items:
+    - source: net.conf.j2
+      destination: /etc/telegraf/telegraf.d/net.conf
+  notify:
+    - restart telegraf service
+    - restart telegraf resource
+
+- name: Configure telegraf inputs (net)
+  when: telegraf_configure_input_net | lower == 'true'
+  template: src={{ item.source }} dest={{ item.destination }}
+  with_items:
+    - source: system.conf.j2
+      destination: /etc/telegraf/telegraf.d/system.conf
+  notify:
+    - restart telegraf service
+    - restart telegraf resource
+
+#- name: Configure telegraf inputs (consumer)
+#  when: telegraf_configure_input_net | lower == 'true'
+#  template: src={{ item.source }} dest={{ item.destination }}
+#    - source: system.conf.j2
+#      destination: /etc/telegraf/telegraf.d/system.conf
+#  notify:
+#    - restart telegraf service
+#    - restart telegraf resource
+
+- name: Consul service definition
+  when:
+    - configure_consul | lower == 'true'
+  notify: reload consul
+  template: src=service.consul.json.j2 dest={{ telegraf_consul_services_path }}/{{ item.service.name }}.json
+  with_items: "{{ telegraf_consul }}"
+
+- name: (Re)start docker
+  when:
+    - telegraf_cluster_aware | lower == 'false'
+    - telegraf_use_docker | lower == 'true'
+  block:
+    - name: Start the container
+      docker_container:
+        state: started
+        name: telegraf-server
+        image: "{{ telegraf_docker_image }}"
+        published_ports: "{{ telegraf_docker_published_ports }}"
+        volumes: "telegraf_docker_volumes }}"
+        env: "{{ telegraf_docker_env }}"

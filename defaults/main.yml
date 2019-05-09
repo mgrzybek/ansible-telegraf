@@ -1,0 +1,93 @@
+---
+
+telegraf_cluster_aware: false
+telegraf_cluster_resource_name:
+
+telegraf_use_docker: false
+telegraf_docker_image: telegraf
+telegraf_docker_tag: alpine
+telegraf_docker_env: {}
+telegraf_docker_published_ports: []
+telegraf_docker_volumes: []
+
+telegraf_package_state: present
+
+telegraf_config_consul: false
+telegraf_consul_services_path: /etc/consul.d
+telegraf_consul:
+    - service:
+        name: "telegraf"
+        tags:
+            - "traefik.enable=false"
+        checks:
+            - args:
+                - "systemctl"
+                - "status"
+                - "telegraf"
+              interval: "60s"
+
+telegraf_metrics_agent_interval_seconds: 60
+
+telegraf_configure_input_system: true
+telegraf_configure_input_net: true
+
+telegraf_main_config:
+    add_node_type: true
+    global_tags: {}
+    #gloabl_tags:
+    #    - key:
+    #      value: 
+    agent:
+        interval: "{{ telegraf_metrics_agent_interval_seconds }}"
+        round_interval: false
+        metric_batch_size: 1024
+        metric_buffer_limit: 10240
+        collection_jitter: 8s
+        flush_interval: "{{ telegraf_metrics_agent_interval_seconds * 2 }}s"
+        precision: ""
+        debug: false
+        quiet: false
+        logfile: ""
+        omit_hostname: false
+
+telegraf_output_amqp_config: {}
+#telegraf_output_amqp_config:
+#    url: "amqp://amqp_user:amqp_password@amqp_server:5672/amqp_vhost"
+#    exchange: telegraf
+#    auth_method: PLAIN
+#    routing_tag: host
+#    insecure_skip_verify: true
+#    data_format: influx
+#    template: host.measurement.tags.field
+ 
+telegraf_output_kafka_config: {}
+#telegraf_output_kafka_config:
+#    brokers: []
+#    topic: "telegraf"
+#    routing_tag: "host"
+#    compression_codec: 0
+#    required_acks: -1
+#    max_retry: 3
+#    insecure_skip_verify: true
+#    data_format:
+
+telegraf_output_elasticsearch_config: {}
+#telegraf_output_elasticsearch_config:
+#    urls: []
+#    timeout: "5s"
+#    enable_sniffer: true
+#    health_check_interval: "10s"
+#    index_name: "telegraf-%Y.%m.%d"
+#    insecure_skip_verify: true
+#    manage_template: true
+#    overwrite_template: false
+
+telegraf_output_influxdb_config: {}
+#telegraf_output_influxdb_config:
+#    urls: []
+#    database: "telegraf"
+#    skip_database_creation: true
+#    retention_policy: ""
+#    timeout: 5s
+#    insecure_skip_verify: true
+    

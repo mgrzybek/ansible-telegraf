@@ -1,0 +1,30 @@
+# {{ ansible_managed }}
+
+{% if telegraf_output_amqp_config != None %}
+# Configuration for the AMQP server to send metrics to
+[[outputs.amqp]]
+{% for item in telegraf_output_amqp_config %}
+	{{ item }} = {{ telegraf_output_amqp_config[item]
+{% endfor %}
+{% endif %}
+
+{% if telegraf_output_kafka_config != None %}
+[[outputs.kafka]]
+{% for item in telegraf_output_kafka_config %}
+	{{ item }} = {{ telegraf_output_kafka_config[item]
+{% endfor %}
+{% endif %}
+
+{% if telegraf_output_elasticsearch_config != None %}
+[[outputs.elasticsearch]]
+{% for item in telegraf_output_elasticsearch_config %}
+	{{ item }} = {{ telegraf_output_elasticsearch_config[item]
+{% endfor %}
+{% endif %}
+
+{% if telegraf_output_influxdb_config != None %}
+[[outputs.influxdb]]
+{% for item in telegraf_output_influxdb_config %}
+	{{ item }} = {{ telegraf_output_influxdb_config[item]
+{% endfor %}
+{% endif %}

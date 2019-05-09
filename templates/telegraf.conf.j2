@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+#
+# Telegraf Configuration
+#
+
+[global_tags]
+{% if telegraf_config.add_node_type | lower == 'true' %}
+{% if ansible_virtualization_role == 'host' %}
+	node_type = "physical_host"
+{% elif ansible_virtualization_type == 'lxc' %}
+	node_type = "container"
+{% else %}
+	node_type = "{{ ansible_virtualization_type }}"
+{% endif %}
+{% endif %}
+{% for tag in telegraf_config.global_tags %}
+	{{ tag.key }} = "{{tag.value }}"
+{% endfor %}
+
+[agent]
+{% for key in telegraf_config.agent %}
+	{{ key }} = {{ telegraf_config.agent[key] }}
+{% endfor %}
