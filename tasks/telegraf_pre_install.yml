@@ -23,10 +23,27 @@
 - name: APT-based
   when: ansible_os_family | lower == 'debian'
   block:
-    - name: Get repo key
-      apt_key:
-        url: "{{ telegraf_repo_key_url }}"
-        state: present
+    - when: telegraf_http_proxy != None
+      block:
+        - name: Get key using a proxy
+          when: telegraf_http_proxy != None
+          notify: cleanup /tmp/influx.key
+          get_url:
+            use_proxy: yes
+            url: "{{ telegraf_repo_key_url }}"
+            dest: /tmp/influx.key
+
+        - name: Get repo key
+          apt_key:
+            data: "{{ lookup('file', '/tmp/influx.key') }}"
+            state: present
+
+    - when: telegraf_http_proxy == None
+      block:
+        - name: Get repo key
+          apt_key:
+            url: "{{ telegraf_repo_key_url }}"
+            state: present
 
     - name: Create apt repo
       apt_repository:

@@ -34,6 +34,8 @@ telegraf_metrics_agent_interval_seconds: 60
 telegraf_configure_input_system: true
 telegraf_configure_input_net: true
 
+telegraf_http_proxy:
+
 telegraf_main_config:
     add_node_type: true
     global_tags: {}

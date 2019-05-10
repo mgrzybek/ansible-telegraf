@@ -29,5 +29,5 @@
 - name: restart telegraf
   service: name=telegraf state=restarted
 
-- name: delete repo key file
-  file: path="{{ repo_key_result.dest }}" state=absent
+- name: cleanup /tmp/influx.key
+  file: path=/tmp/influx.key state=absent
