@@ -5,7 +5,7 @@
 
 # Global tags can be specified here in key="value" format.
 [global_tags]
-{% if metrics_global_tags_add_node_type == true %}
+{% if telegraf_main_config.add_node_type | lower == 'true' %}
 {% if ansible_virtualization_role == 'host' %}
 	node_type = "physical_host"
 {% elif ansible_virtualization_type == 'lxc' %}
