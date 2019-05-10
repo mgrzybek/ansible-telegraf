@@ -11,6 +11,7 @@ telegraf_docker_published_ports: []
 telegraf_docker_volumes: []
 
 telegraf_package_state: present
+cache_timeout: 600
 
 telegraf_config_consul: false
 telegraf_consul_services_path: /etc/consul.d
@@ -43,7 +44,7 @@ telegraf_main_config:
         metric_batch_size: 1024
         metric_buffer_limit: 10240
         collection_jitter: 8s
-        flush_interval: "{{ telegraf_metrics_agent_interval_seconds * 2 }}s"
+        flush_jitter: 8s
         precision: ""
         debug: false
         quiet: false
