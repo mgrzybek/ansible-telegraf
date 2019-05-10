@@ -47,6 +47,12 @@
   template: src=service.consul.json.j2 dest={{ telegraf_consul_services_path }}/{{ item.service.name }}.json
   with_items: "{{ telegraf_consul }}"
 
+- name: Mobprobe nf_conntrack
+  when: ansible_virtualization_type != 'lxc'
+  modprobe:
+    name: nf_conntrack
+    state: present
+
 - name: Check configuration
   when:
     - telegraf_use_docker | lower == 'false'
