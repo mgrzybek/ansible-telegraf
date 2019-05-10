@@ -79,9 +79,11 @@ telegraf_output_elasticsearch_config: {}
 #    enable_sniffer: true
 #    health_check_interval: "10s"
 #    index_name: "telegraf-%Y.%m.%d"
+#    default_tag_value: none
 #    insecure_skip_verify: true
 #    manage_template: true
 #    overwrite_template: false
+#    graphite_template:
 
 telegraf_output_influxdb_config: {}
 #telegraf_output_influxdb_config:

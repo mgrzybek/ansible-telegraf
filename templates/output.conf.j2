@@ -1,30 +1,244 @@
 # {{ ansible_managed }}
 
-{% if telegraf_output_amqp_config != None %}
+{% if telegraf_output_amqp_config != None and telegraf_output_amqp_config | length > 0 %}
 # Configuration for the AMQP server to send metrics to
 [[outputs.amqp]]
-{% for item in telegraf_output_amqp_config %}
-	{{ item }} = {{ telegraf_output_amqp_config[item] }}
-{% endfor %}
+	## AMQP url
+	url = "{{ telegraf_output_amqp.url }}"
+	## AMQP exchange
+	exchange = "{{ telegraf_output_amqp.exchange }}"
+
+	## Auth method. PLAIN and EXTERNAL are supported
+	auth_method = "{{ telegraf_output_amqp.auth_method }}"
+
+	## Telegraf tag to use as a routing key
+	##	ie, if this tag exists, it's value will be used as the routing key
+	routing_tag = "{{ telegraf_output_amqp.routing_tag }}"
+
+	## Optional SSL Config
+	# ssl_ca = "/etc/telegraf/ca.pem"
+	# ssl_cert = "/etc/telegraf/cert.pem"
+	# ssl_key = "/etc/telegraf/key.pem"
+	## Use SSL but skip chain & host verification
+	insecure_skip_verify  = {{ telegraf_output_amqp.insecure_skip_verify | lower }}
+
+	## Data format to output.
+	## Each data format has it's own unique set of configuration options, read
+	## more about them here:
+	## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+	data_format = "{{ telegraf_output_amqp.data_format }}"
+
+{% if telegraf_output_amqp.data_format == 'graphite' %}
+	## Graphite output template
+	## see https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+	template = "{{ telegraf_output_amqp.graphite_template }}"
+{% endif %}
 {% endif %}
 
-{% if telegraf_output_kafka_config != None %}
+{% if telegraf_output_kafka_config != None and telegraf_output_kafka_config | length > 0%}
 [[outputs.kafka]]
-{% for item in telegraf_output_kafka_config %}
-	{{ item }} = {{ telegraf_output_kafka_config[item] }}
-{% endfor %}
+	## URLs of kafka brokers
+	brokers = ["{{ telegraf_output_kafka.brokers | map('quote') | join(',') }}"]
+	## Kafka topic for producer messages
+	topic = "{{ telegraf_output_kafka.topic }}"
+
+	## Optional topic suffix configuration.
+	## If the section is omitted, no suffix is used.
+	## Following topic suffix methods are supported:
+	##	 measurement - suffix equals to separator + measurement's name
+	##	 tags				- suffix equals to separator + specified tags' values
+	##								 interleaved with separator
+
+	## Suffix equals to "_" + measurement's name
+	# [outputs.kafka.topic_suffix]
+	#	 method = "measurement"
+	#	 separator = "_"
+
+	## Suffix equals to "__" + measurement's "foo" tag value.
+	##	 If there's no such a tag, suffix equals to an empty string
+	# [outputs.kafka.topic_suffix]
+	#	 method = "tags"
+	#	 keys = ["foo"]
+	#	 separator = "__"
+
+	## Suffix equals to "_" + measurement's "foo" and "bar"
+	##	 tag values, separated by "_". If there is no such tags,
+	##	 their values treated as empty strings.
+	# [outputs.kafka.topic_suffix]
+	#	 method = "tags"
+	#	 keys = ["foo", "bar"]
+	#	 separator = "_"
+
+	## Telegraf tag to use as a routing key
+	##	ie, if this tag exists, its value will be used as the routing key
+	routing_tag = "{{ telegraf_output_kafka.routing_tag }}"
+
+	## CompressionCodec represents the various compression codecs recognized by
+	## Kafka in messages.
+	##	0 : No compression
+	##	1 : Gzip compression
+	##	2 : Snappy compression
+	compression_codec = {{ telegraf_output_kafka.compression_codec }}
+
+	##	RequiredAcks is used in Produce Requests to tell the broker how many
+	##	replica acknowledgements it must see before responding
+	##	 0 : the producer never waits for an acknowledgement from the broker.
+	##			 This option provides the lowest latency but the weakest durability
+	##			 guarantees (some data will be lost when a server fails).
+	##	 1 : the producer gets an acknowledgement after the leader replica has
+	##			 received the data. This option provides better durability as the
+	##			 client waits until the server acknowledges the request as successful
+	##			 (only messages that were written to the now-dead leader but not yet
+	##			 replicated will be lost).
+	##	 -1: the producer gets an acknowledgement after all in-sync replicas have
+	##			 received the data. This option provides the best durability, we
+	##			 guarantee that no messages will be lost as long as at least one in
+	##			 sync replica remains.
+	required_acks = {{ telegraf_output_kafka.required_acks }}
+
+	##	The total number of times to retry sending a message
+	max_retry = {{ telegraf_output_kafka.max_retry }}
+
+	## Optional SSL Config
+	# ssl_ca = "/etc/telegraf/ca.pem"
+	# ssl_cert = "/etc/telegraf/cert.pem"
+	# ssl_key = "/etc/telegraf/key.pem"
+	## Use SSL but skip chain & host verification
+	insecure_skip_verify  = {{ telegraf_output_kafka.insecure_skip_verify | lower }}
+
+	## Optional SASL Config
+	# sasl_username = "kafka"
+	# sasl_password = "secret"
+
+	data_format = "{{ telegraf_output_kafka.data_format }}"
 {% endif %}
 
-{% if telegraf_output_elasticsearch_config != None %}
+{% if telegraf_output_elasticsearch_config != None and telegraf_output_elasticsearch_config | length > 0%}
 [[outputs.elasticsearch]]
-{% for item in telegraf_output_elasticsearch_config %}
-	{{ item }} = {{ telegraf_output_elasticsearch_config[item] }}
-{% endfor %}
+	## The full HTTP endpoint URL for your Elasticsearch instance
+	## Multiple urls can be specified as part of the same cluster,
+	## this means that only ONE of the urls will be written to each interval.
+	urls = [ "{{ telegraf_output_elasticsearch_config.urls | map('quote') | join(',') }}" ] # required.
+	## Elasticsearch client timeout, defaults to "5s" if not set.
+	timeout = "{{ telegraf_output_elasticsearch_config.timeout }}"
+	## Set to true to ask Elasticsearch a list of all cluster nodes,
+	## thus it is not necessary to list all nodes in the urls config option
+	enable_sniffer = {% if telegraf_output_elasticsearch_config.urls | length > 1 %}false{% else %}true{% endif %}
+	## Set the interval to check if the Elasticsearch nodes are available
+	## Setting to "0s" will disable the health check (not recommended in production)
+	health_check_interval = "{{ telegraf_output_elasticsearch_config.health_check_interval }}"
+	## HTTP basic authentication details (eg. when using Shield)
+{% if telegraf_output_influxdb_config.username is defined and  telegraf_output_influxdb_config.password is defined %}
+	username = "{{ telegraf_output_influxdb_config.username }}"
+	password = "{{ telegraf_output_influxdb_config.password }}"
+{% else %}
+	# username = "telegraf"
+	# password = "mypassword"
 {% endif %}
 
-{% if telegraf_output_influxdb_config != None %}
+	## Index Config
+	## The target index for metrics (Elasticsearch will create if it not exists).
+	## You can use the date specifiers below to create indexes per time frame.
+	## The metric timestamp will be used to decide the destination index name
+	# %Y - year (2016)
+	# %y - last two digits of year (00..99)
+	# %m - month (01..12)
+	# %d - day of month (e.g., 01)
+	# %H - hour (00..23)
+	# %V - week of the year (ISO week) (01..53)
+	## Additionally, you can specify a tag name using the notation \{\{tag_name\}\}
+	## which will be used as part of the index name. If the tag does not exist,
+	## the default tag value will be used.
+	# index_name = "telegraf-\{\{host\}\}-%Y.%m.%d"
+	# default_tag_value = "none"
+	default_tag_value = "{{telegraf_output_elasticsearch_config.default_tag_value }}"
+	index_name = "{{ telegraf_output_elasticsearch_config.index_name }}" # required.
+
+	## Optional SSL Config
+	# ssl_ca = "/etc/telegraf/ca.pem"
+	# ssl_cert = "/etc/telegraf/cert.pem"
+	# ssl_key = "/etc/telegraf/key.pem"
+	## Use SSL but skip chain & host verification
+	insecure_skip_verify  = {{ telegraf_output_elasticsearch_config.insecure_skip_verify }}
+
+	## Template Config
+	## Set to true if you want telegraf to manage its index template.
+	## If enabled it will create a recommended index template for telegraf indexes
+	manage_template = true
+	## The template name used for telegraf indexes
+	template_name = "telegraf"
+	## Set to true if you want telegraf to overwrite an existing template
+	overwrite_template = false
+{% endif %}
+
+{% if telegraf_output_influxdb_config != None and telegraf_output_influxdb_config | length > 0 %}
 [[outputs.influxdb]]
-{% for item in telegraf_output_influxdb_config %}
-	{{ item }} = {{ telegraf_output_influxdb_config[item] }}
-{% endfor %}
+	## The full HTTP or UDP URL for your InfluxDB instance.
+	##
+	## Multiple URLs can be specified for a single cluster, only ONE of the
+	## urls will be written to each interval.
+	# urls = ["unix:///var/run/influxdb.sock"]
+	# urls = ["udp://127.0.0.1:8089"]
+	# urls = ["http://127.0.0.1:8086"]
+	urls = [ "{{ telegraf_output_influxdb_config.urls | map('quote') | join(',') }}" ] # required.
+
+	## The target database for metrics; will be created as needed.
+	database = "{{ telegraf_output_influxdb_config.database }}"
+
+	## If true, no CREATE DATABASE queries will be sent.  Set to true when using
+	## Telegraf with a user without permissions to create databases or when the
+	## database already exists.
+	skip_database_creation = {{ telegraf_output_influxdb_config.skip_database_creation | lower }}
+
+	## Name of existing retention policy to write to.  Empty string writes to
+	## the default retention policy.  Only takes effect when using HTTP.
+	retention_policy = "{{ telegraf_output_influxdb_config.retention_policy }}"
+
+	## Write consistency (clusters only), can be: "any", "one", "quorum", "all".
+	## Only takes effect when using HTTP.
+	# write_consistency = "any"
+
+	## Timeout for HTTP messages.
+	timeout = "{{telegraf_output_influxdb_config.timeout }}"
+
+{% if telegraf_output_influxdb_config.username is defined and  telegraf_output_influxdb_config.password is defined %}
+	## HTTP Basic Auth
+	username = "{{ telegraf_output_influxdb_config.username }}"
+	password = "{{ telegraf_output_influxdb_config.password }}"
+{% endif %}
+
+	## HTTP User-Agent
+	# user_agent = "telegraf"
+
+	## UDP payload size is the maximum packet size to send.
+	# udp_payload = 512
+
+	## Optional TLS Config for use on HTTP connections.
+	# tls_ca = "/etc/telegraf/ca.pem"
+	# tls_cert = "/etc/telegraf/cert.pem"
+	# tls_key = "/etc/telegraf/key.pem"
+	## Use TLS but skip chain & host verification
+	insecure_skip_verify  = {{ telegraf_output_influxdb_config.insecure_skip_verify | lower }}
+
+	## HTTP Proxy override, if unset values the standard proxy environment
+	## variables are consulted to determine which proxy, if any, should be used.
+{% if telegraf_output_influxdb_config.http_proxy_url is defined %}
+	http_proxy = "{{ telegraf_output_influxdb_config.http_proxy_url }}"
+{% else %}
+	# http_proxy = "http://corporate.proxy:3128"
+{% endif %}
+
+
+	## Additional HTTP headers
+	# http_headers = {"X-Special-Header" = "Special-Value"}
+
+	## HTTP Content-Encoding for write request body, can be set to "gzip" to
+	## compress body or "identity" to apply no encoding.
+	# content_encoding = "identity"
+
+	## When true, Telegraf will output unsigned integers as unsigned values,
+	## i.e.: "42u".  You will need a version of InfluxDB supporting unsigned
+	## integer values.  Enabling this option will result in field type errors if
+	## existing data has been written.
+	# influx_uint_support = false
 {% endif %}
