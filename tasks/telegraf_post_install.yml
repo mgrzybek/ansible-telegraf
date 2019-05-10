@@ -71,7 +71,7 @@
           - "-config-directory"
           - "/etc/telegraf/telegraf.d"
           - "--test"
-  
+
     - name: Start the container
       docker_container:
         state: started
