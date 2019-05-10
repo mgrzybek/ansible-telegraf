@@ -13,6 +13,8 @@ telegraf_docker_volumes: []
 telegraf_package_state: present
 cache_timeout: 600
 
+telegraf_post_config_restart_on_change: true
+
 telegraf_config_consul: false
 telegraf_consul_services_path: /etc/consul.d
 telegraf_consul:
@@ -60,6 +62,7 @@ telegraf_output_amqp_config: {}
 #    insecure_skip_verify: true
 #    data_format: influx
 #    template: host.measurement.tags.field
+#    graphite_template:
  
 telegraf_output_kafka_config: {}
 #telegraf_output_kafka_config:
@@ -83,7 +86,6 @@ telegraf_output_elasticsearch_config: {}
 #    insecure_skip_verify: true
 #    manage_template: true
 #    overwrite_template: false
-#    graphite_template:
 
 telegraf_output_influxdb_config: {}
 #telegraf_output_influxdb_config:
