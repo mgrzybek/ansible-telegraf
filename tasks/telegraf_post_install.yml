@@ -47,11 +47,31 @@
   template: src=service.consul.json.j2 dest={{ telegraf_consul_services_path }}/{{ item.service.name }}.json
   with_items: "{{ telegraf_consul }}"
 
+- name: Check configuration
+  when:
+    - telegraf_use_docker | lower == 'false'
+  command: telegraf -config /etc/telegraf/telegraf.conf -config-directory /etc/telegraf/telegraf.d --test
+
 - name: (Re)start docker
   when:
     - telegraf_cluster_aware | lower == 'false'
     - telegraf_use_docker | lower == 'true'
   block:
+    - name: Check configuration
+      docker_container:
+        name: telegraf-server-testing
+        image: "{{ telegraf_docker_image }}"
+        published_ports: "{{ telegraf_docker_published_ports }}"
+        volumes: "telegraf_docker_volumes }}"
+        env: "{{ telegraf_docker_env }}"
+        command:
+          - "telegraf"
+          - "-config"
+          - "/etc/telegraf/telegraf.conf"
+          - "-config-directory"
+          - "/etc/telegraf/telegraf.d"
+          - "--test"
+  
     - name: Start the container
       docker_container:
         state: started
