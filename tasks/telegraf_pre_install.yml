@@ -11,13 +11,13 @@
 - name: Check Consul configuration
   when:
     - telegraf_config_consul | lower == 'true'
-    - not ansible_facts.services.consul is defined
+    - not (ansible_facts.services | map('quote') | join(',') | regex_search('consul'))
   fail: msg="Consul service not found - Cannot configure it"
 
 - name: Check cluster configuration
   when:
     - telegraf_cluster_aware | lower == 'true'
-    - not ansible_facts.services.pacemaker is defined
+    - not (ansible_facts.services | map('quote') | join(',') | regex_search('pacemaker'))
   fail: msg="Pacemaker service not found - Cannot configure it"
 
 - name: APT-based
@@ -44,14 +44,15 @@
         gpgkey: "{{ telegraf_repo_key }}"
 
 - name: Set local fact - Configure firewalld
-  when: ansible_facts.services.firewalld is defined
+  when:
+    - ansible_facts.services | map('quote') | join(',') | regex_search('firewalld')
   set_fact:
     use_firewalld: true
 
 - name: Get Consul details
   when:
     - telegraf_config_consul | lower == 'true'
-    - ansible_facts.services.consul is defined
+    - ansible_facts.services | map('quote') | join(',') | regex_search('consul')
   block:
     - name: Get Consul service details
       systemd: name=consul
@@ -59,7 +60,7 @@
 
     - name: Set Consul facts
       set_fact:
-        consul_bin: "{{ systemd_result.status.ExecStart | regex_replace('^.+path=(.+?)\\s+.+?$','\\1') }}"
+        consul_bin: "{{ consul_systemd.status.ExecStart | regex_replace('^.+path=(.+?)\\s+.+?$','\\1') }}"
         configure_consul: true
 
 - name: Cluster-aware facts
