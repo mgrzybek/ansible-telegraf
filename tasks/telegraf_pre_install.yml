@@ -32,6 +32,9 @@
             use_proxy: yes
             url: "{{ telegraf_repo_key_url }}"
             dest: /tmp/influx.key
+          environment:
+            http_proxy: "{{ telegraf_http_proxy }}"
+            https_proxy: "{{ telegraf_http_proxy }}"
 
         - name: Get repo key
           apt_key:
