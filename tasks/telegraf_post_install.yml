@@ -15,8 +15,8 @@
   when: telegraf_configure_input_system | lower == 'true'
   template: src={{ item.source }} dest={{ item.destination }}
   with_items:
-    - source: net.conf.j2
-      destination: /etc/telegraf/telegraf.d/net.conf
+    - source: system.conf.j2
+      destination: /etc/telegraf/telegraf.d/system.conf
   notify:
     - restart telegraf service
     - restart telegraf resource
@@ -25,8 +25,8 @@
   when: telegraf_configure_input_net | lower == 'true'
   template: src={{ item.source }} dest={{ item.destination }}
   with_items:
-    - source: system.conf.j2
-      destination: /etc/telegraf/telegraf.d/system.conf
+    - source: net.conf.j2
+      destination: /etc/telegraf/telegraf.d/net.conf
   notify:
     - restart telegraf service
     - restart telegraf resource
