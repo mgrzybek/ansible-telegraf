@@ -62,7 +62,7 @@
         name: telegraf
         description: telegraf repo
         baseurl: "{{ telegraf_repo_rpm_url }}"
-        gpgkey: "{{ telegraf_repo_key }}"
+        gpgkey: "{{ telegraf_repo_key_url }}"
 
 - name: Set local fact - Configure firewalld
   when:
