@@ -36,6 +36,7 @@
     - telegraf_influxdb_listener_config != None
     - telegraf_influxdb_listener_config | length > 0
   template: src={{ item.source }} dest={{ item.destination }}
+  with_items:
     - source: listener.conf.j2
       destination: /etc/telegraf/telegraf.d/listener.conf
   notify:
