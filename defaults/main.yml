@@ -98,3 +98,13 @@ telegraf_output_influxdb_config: {}
 #    timeout: 5s
 #    insecure_skip_verify: true
     
+telegraf_influxdb_listener_config: {}
+#telegraf_influxdb_listener_config:
+#    service_address: 127.0.0.1:8186
+#    read_timeout: 10s
+#    write_timeout: 10s
+#    max_body_size: 0
+#    max_line_size: 0
+#    tls_allowed_cacerts: []
+#    tls_cert:
+#    tls_key:

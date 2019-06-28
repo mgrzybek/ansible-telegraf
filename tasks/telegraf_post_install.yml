@@ -30,6 +30,17 @@
   notify:
     - restart telegraf service
     - restart telegraf resource
+ 
+- name: Configure telegraf inputs (listener)
+  when:
+    - telegraf_influxdb_listener_config != None
+    - telegraf_influxdb_listener_config | length > 0
+  template: src={{ item.source }} dest={{ item.destination }}
+    - source: listener.conf.j2
+      destination: /etc/telegraf/telegraf.d/listener.conf
+  notify:
+    - restart telegraf service
+    - restart telegraf resource
 
 #- name: Configure telegraf inputs (consumer)
 #  when: telegraf_configure_input_net | lower == 'true'
