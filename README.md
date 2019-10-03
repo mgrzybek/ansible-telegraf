@@ -53,6 +53,36 @@ Create an InfluxDB proxy:
             max_body_size: 0
             max_line_size: 0
 
+Set agent options:
+
+    - hosts: servers
+      roles:
+         - ansible-telegraf
+      vars:
+         telegraf_output_influxdb_config:
+            urls: ["http://metrics.example.com:8086"]
+            database: "telegraf"
+            skip_database_creation: true
+            retention_policy: ""
+            timeout: 5s
+            insecure_skip_verify: true
+         telegraf_main_config:
+            global_tags:
+                os_project: "cloud-1"
+            add_node_type: false
+            agent:
+                interval: "{{ telegraf_metrics_agent_interval_seconds }}"
+                round_interval: false
+                metric_batch_size: 1024
+                metric_buffer_limit: 10240
+                collection_jitter: 8s
+                flush_jitter: 8s
+                precision: ""
+                debug: false
+                quiet: false
+                logfile: ""
+                omit_hostname: false
+            
 License
 -------
 
