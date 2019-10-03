@@ -17,7 +17,7 @@
 	## Environment variables can be used as tags, and throughout the config file
 	# user = "$USER"
 {% for tag in telegraf_main_config.global_tags %}
-	{{ tag.key }} = "{{ tag.value }}"
+	{{ tag }} = "{{ telegraf_main_config.global_tags[tag] }}"
 {% endfor %}
 
 # Configuration for telegraf agent
