@@ -228,7 +228,6 @@
 	# http_proxy = "http://corporate.proxy:3128"
 {% endif %}
 
-
 	## Additional HTTP headers
 	# http_headers = {"X-Special-Header" = "Special-Value"}
 
@@ -241,4 +240,66 @@
 	## integer values.  Enabling this option will result in field type errors if
 	## existing data has been written.
 	# influx_uint_support = false
+{% endif %}
+
+{% if telegraf_output_influxdbv2_config != None and telegraf_output_influxdbv2_config | length > 0 %}
+# Configuration for sending metrics to InfluxDB 2.0
+[[outputs.influxdb_v2]]
+	## The URLs of the InfluxDB cluster nodes.
+	##
+	## Multiple URLs can be specified for a single cluster, only ONE of the
+	## urls will be written to each interval.
+	##   ex: urls = ["https://us-west-2-1.aws.cloud2.influxdata.com"]
+	urls = [ "{{ telegraf_output_influxdbv2_config.urls | map('quote') | join(',') }}" ] # required.
+
+	## Token for authentication.
+	token = "{{ telegraf_output_influxdbv2_config.token }}"
+
+	## Organization is the name of the organization you wish to write to.
+	organization = "{{ telegraf_output_influxdbv2_config.org }}"
+
+	## Destination bucket to write into.
+	bucket = "{{ telegraf_output_influxdbv2_config.bucket }}"
+
+	## The value of this tag will be used to determine the bucket.  If this
+	## tag is not set the 'bucket' option is used as the default.
+{% if telegraf_output_influxdbv2_config.bucket_tag is defined and telegraf_output_influxdbv2_config.bucket_tag | length > 0 %}
+	bucket_tag = "{{ telegraf_output_influxdbv2_config.bucket_tag }}"
+{% else %}
+	# bucket_tag = ""
+{% endif %}
+
+	## If true, the bucket tag will not be added to the metric.
+	exclude_bucket_tag = {{ telegraf_output_influxdbv2_config.exclude_bucket_tag | default('false') }}
+
+	## Timeout for HTTP messages.
+	# timeout = "5s"
+
+	## Additional HTTP headers
+	# http_headers = {"X-Special-Header" = "Special-Value"}
+
+	## HTTP Proxy override, if unset values the standard proxy environment
+	## variables are consulted to determine which proxy, if any, should be used.
+{% if telegraf_output_influxdbv2_config.http_proxy_url is defined %}
+	 http_proxy = "{{ telegraf_output_influxdbv2_config.http_proxy_url }}"
+{% else %}
+	# http_proxy = "http://corporate.proxy:3128"
+{% endif %}
+
+	## HTTP User-Agent
+	# user_agent = "telegraf"
+
+	## Content-Encoding for write request body, can be set to "gzip" to
+	## compress body or "identity" to apply no encoding.
+	# content_encoding = "gzip"
+
+	## Enable or disable uint support for writing uints influxdb 2.0.
+	# influx_uint_support = false
+
+	## Optional TLS Config for use on HTTP connections.
+	# tls_ca = "/etc/telegraf/ca.pem"
+	# tls_cert = "/etc/telegraf/cert.pem"
+	# tls_key = "/etc/telegraf/key.pem"
+	## Use TLS but skip chain & host verification
+	insecure_skip_verify  = {{ telegraf_output_influxdb_config.insecure_skip_verify | lower }}
 {% endif %}

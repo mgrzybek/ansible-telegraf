@@ -3,7 +3,7 @@
 telegraf_cluster_aware: false
 telegraf_cluster_resource_name:
 
-telegraf_use_docker: false
+telegraf_use_docker: true
 telegraf_docker_image: telegraf
 telegraf_docker_tag: alpine
 telegraf_docker_env: {}
@@ -108,3 +108,12 @@ telegraf_influxdb_listener_config: {}
 #    tls_allowed_cacerts: []
 #    tls_cert:
 #    tls_key:
+
+telegraf_influxdbv2_listener_config: {}
+#telegraf_influxdbv2_listener_config:
+#    urls: []
+#    token: "" 
+#    bucket: ""
+#    bucket_tag: ""
+#    exclude_bucket_tag: false
+#    insecure_skip_verify: false
