@@ -270,7 +270,7 @@
 {% endif %}
 
 	## If true, the bucket tag will not be added to the metric.
-	exclude_bucket_tag = {{ telegraf_output_influxdbv2_config.exclude_bucket_tag | default('false') }}
+	exclude_bucket_tag = {{ telegraf_output_influxdbv2_config.exclude_bucket_tag | default('false') | lower }}
 
 	## Timeout for HTTP messages.
 	# timeout = "5s"
@@ -300,6 +300,6 @@
 	# tls_ca = "/etc/telegraf/ca.pem"
 	# tls_cert = "/etc/telegraf/cert.pem"
 	# tls_key = "/etc/telegraf/key.pem"
-	## Use TLS but skip chain & host verification
-	insecure_skip_verify  = {{ telegraf_output_influxdb_config.insecure_skip_verify | lower }}
+	insecure_skip_verify  = {{ telegraf_output_influxdbv2_config.insecure_skip_verify | lower }}
+
 {% endif %}

@@ -83,6 +83,38 @@ Set agent options:
                 logfile: ""
                 omit_hostname: false
             
+Use InfluxDB v2:
+
+    - hosts: servers
+      roles:
+         - ansible-telegraf
+      vars:
+         telegraf_output_influxdbv2_config
+             urls: ["http://localhost:8086"]
+             token: "secret" 
+             org: "my-org"
+             bucket: "default"
+             bucket_tag: ""
+             exclude_bucket_tag: false
+             insecure_skip_verify: false
+         telegraf_main_config:
+            global_tags:
+                os_project: "cloud-1"
+            add_node_type: false
+            agent:
+                interval: "{{ telegraf_metrics_agent_interval_seconds }}"
+                round_interval: false
+                metric_batch_size: 1024
+                metric_buffer_limit: 10240
+                collection_jitter: 8s
+                flush_jitter: 8s
+                precision: ""
+                debug: false
+                quiet: false
+                logfile: ""
+                omit_hostname: false
+
+
 License
 -------
 
