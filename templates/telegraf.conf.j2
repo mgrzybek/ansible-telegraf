@@ -15,10 +15,13 @@
 {% endif %}
 {% endif %}
 	## Environment variables can be used as tags, and throughout the config file
-	# user = "$USER"
+{% if telegraf_main_config.global_tags is defined and telegraf_main_config.global_tags != None %}
 {% for tag in telegraf_main_config.global_tags %}
 	{{ tag }} = "{{ telegraf_main_config.global_tags[tag] }}"
 {% endfor %}
+{% else %}
+	# user = "$USER"
+{% endif %}
 
 # Configuration for telegraf agent
 [agent]
