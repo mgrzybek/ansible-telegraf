@@ -114,6 +114,33 @@ Use InfluxDB v2:
                 logfile: ""
                 omit_hostname: false
 
+Use custom input:
+
+    - hosts: servers
+      roles:
+         - ansible-telegraf
+      vars:
+         telegraf_custom_inputs:
+            - name: grafana
+              plugin: prometheus
+              options:
+                 - urls: '[ "http://localhost:3000/metrics" ]'
+         telegraf_main_config:
+            global_tags:
+                os_project: "cloud-1"
+            add_node_type: false
+            agent:
+                interval: "{{ telegraf_metrics_agent_interval_seconds }}"
+                round_interval: false
+                metric_batch_size: 1024
+                metric_buffer_limit: 10240
+                collection_jitter: 8s
+                flush_jitter: 8s
+                precision: ""
+                debug: false
+                quiet: false
+                logfile: ""
+                omit_hostname: false
 
 License
 -------

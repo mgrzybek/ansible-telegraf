@@ -42,6 +42,16 @@
   notify:
     - restart telegraf service
     - restart telegraf resource
+ 
+- name: Configure telegraf inputs (custom)
+  when:
+    - telegraf_custom_inputs != None
+    - telegraf_custom_inputs | length > 0
+  template: src=generic_input.conf.j2 dest=/etc/telegraf/telegraf.d/{{ item.name }}.conf
+  with_items: "{{ telegraf_custom_inputs }}"
+  notify:
+    - restart telegraf service
+    - restart telegraf resource
 
 #- name: Configure telegraf inputs (consumer)
 #  when: telegraf_configure_input_net | lower == 'true'
