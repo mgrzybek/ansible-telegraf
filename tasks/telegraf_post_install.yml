@@ -30,7 +30,7 @@
   notify:
     - restart telegraf service
     - restart telegraf resource
- 
+
 - name: Configure telegraf inputs (listener)
   when:
     - telegraf_influxdb_listener_config != None
@@ -42,7 +42,7 @@
   notify:
     - restart telegraf service
     - restart telegraf resource
- 
+
 - name: Configure telegraf inputs (custom)
   when:
     - telegraf_custom_inputs != None
