@@ -36,6 +36,7 @@ telegraf_configure_input_net: true
 
 telegraf_http_proxy:
 
+telegraf_custom_inputs:
 telegraf_main_config:
     add_node_type: true
     global_tags: {}
