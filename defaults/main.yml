@@ -3,7 +3,7 @@
 telegraf_cluster_aware: false
 telegraf_cluster_resource_name:
 
-telegraf_use_docker: true
+telegraf_use_docker: false
 telegraf_docker_image: telegraf
 telegraf_docker_tag: alpine
 telegraf_docker_env: {}
