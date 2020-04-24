@@ -91,6 +91,7 @@ telegraf_output_elasticsearch_config: {}
 #    overwrite_template: false
 
 telegraf_output_influxdb_config: {}
+telegraf_output_influxdbv2_config: {}
 #telegraf_output_influxdb_config:
 #    urls: []
 #    database: "telegraf"
