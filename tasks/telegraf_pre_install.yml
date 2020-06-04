@@ -57,7 +57,19 @@
 - name: RPM-based
   when: ansible_os_family | lower == 'redhat'
   block:
-    - name: Create yum repo
+    - name: Create yum repo (using proxy)
+      when:
+        - telegraf_http_proxy != None
+        - telegraf_http_proxy | length > 0
+      yum_repository:
+        name: telegraf
+        description: telegraf repo
+        baseurl: "{{ telegraf_repo_rpm_url }}"
+        gpgkey: "{{ telegraf_repo_key_url }}"
+        proxy: "{{ telegraf_http_proxy }}"
+
+    - name: Create yum repo (without proxy)
+      when: telegraf_http_proxy == None or telegraf_http_proxy | length == 0
       yum_repository:
         name: telegraf
         description: telegraf repo
