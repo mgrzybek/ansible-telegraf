@@ -1,6 +1,6 @@
 ---
 
-- name: Post-Install | | Configure telegraf
+- name: Post-Install | Configure telegraf
   template: src={{ item.source }} dest={{ item.destination }}
   with_items:
     - source: telegraf.conf.j2
@@ -11,7 +11,7 @@
     - restart telegraf service
     - restart telegraf resource
 
-- name: Post-Install | | Configure telegraf inputs (system)
+- name: Post-Install | Configure telegraf inputs (system)
   when: telegraf_configure_input_system | lower == 'true'
   template: src={{ item.source }} dest={{ item.destination }}
   with_items:
@@ -21,7 +21,7 @@
     - restart telegraf service
     - restart telegraf resource
 
-- name: Post-Install | | Configure telegraf inputs (net)
+- name: Post-Install | Configure telegraf inputs (net)
   when: telegraf_configure_input_net | lower == 'true'
   template: src={{ item.source }} dest={{ item.destination }}
   with_items:
@@ -31,7 +31,7 @@
     - restart telegraf service
     - restart telegraf resource
 
-- name: Post-Install | | Configure telegraf inputs (listener)
+- name: Post-Install | Configure telegraf inputs (listener)
   when:
     - telegraf_influxdb_listener_config != None
     - telegraf_influxdb_listener_config | length > 0
@@ -43,7 +43,7 @@
     - restart telegraf service
     - restart telegraf resource
 
-- name: Post-Install | | Configure telegraf inputs (custom)
+- name: Post-Install | Configure telegraf inputs (custom)
   when:
     - telegraf_custom_inputs != None
     - telegraf_custom_inputs | length > 0
@@ -53,7 +53,7 @@
     - restart telegraf service
     - restart telegraf resource
 
-#- name: Post-Install | | Configure telegraf inputs (consumer)
+#- name: Post-Install | Configure telegraf inputs (consumer)
 #  when: telegraf_configure_input_net | lower == 'true'
 #  template: src={{ item.source }} dest={{ item.destination }}
 #    - source: system.conf.j2
@@ -62,30 +62,30 @@
 #    - restart telegraf service
 #    - restart telegraf resource
 
-- name: Post-Install | | Consul service definition
+- name: Post-Install | Consul service definition
   when:
     - configure_consul | lower == 'true'
   notify: reload consul
   template: src=service.consul.json.j2 dest={{ telegraf_consul_services_path }}/{{ item.service.name }}.json
   with_items: "{{ telegraf_consul }}"
 
-- name: Post-Install | | Mobprobe nf_conntrack
+- name: Post-Install | Mobprobe nf_conntrack
   when: ansible_virtualization_type != 'lxc'
   modprobe:
     name: nf_conntrack
     state: present
 
-- name: Post-Install | | Check configuration
+- name: Post-Install | Check configuration
   when:
     - telegraf_use_docker | lower == 'false'
   command: telegraf -config /etc/telegraf/telegraf.conf -config-directory /etc/telegraf/telegraf.d --test
 
-- name: Post-Install | | (Re)start docker
+- name: Post-Install | (Re)start docker
   when:
     - telegraf_cluster_aware | lower == 'false'
     - telegraf_use_docker | lower == 'true'
   block:
-    - name: Post-Install | | Check configuration
+    - name: Post-Install | Check configuration
       docker_container:
         name: telegraf-server-testing
         image: "{{ telegraf_docker_image }}"
@@ -100,7 +100,7 @@
           - "/etc/telegraf/telegraf.d"
           - "--test"
 
-    - name: Post-Install | | Start the container
+    - name: Post-Install | Start the container
       docker_container:
         state: started
         name: telegraf-server
