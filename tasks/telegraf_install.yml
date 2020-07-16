@@ -1,6 +1,6 @@
 ---
 
-- name: Install telegraf packages
+- name: Install | | Install telegraf packages
   when: telegraf_use_docker | lower == 'false'
   package:
     name: "{{ telegraf_distro_packages }}"
@@ -16,7 +16,7 @@
     - install-yum
     - install-zypper
 
-- name: Pull docker image
+- name: Install | | Pull docker image
   when: telegraf_use_docker | lower == 'true'
   docker_image:
     name: "{{ telegraf_docker_image }}"
