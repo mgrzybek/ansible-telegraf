@@ -1,5 +1,3 @@
----
-
 - name: Pre-Install | Set default facts
   set_fact:
     use_firewalld: false
@@ -10,99 +8,71 @@
 
 - name: Pre-Install | Check Consul configuration
   when:
-    - telegraf_config_consul | lower == 'true'
-    - not (ansible_facts.services | map('quote') | join(',') | regex_search('consul'))
+  - telegraf_config_consul | lower == 'true'
+  - not (ansible_facts.services | map('quote') | join(',') | regex_search('consul'))
   fail: msg="Consul service not found - Cannot configure it"
 
 - name: Pre-Install | Check cluster configuration
   when:
-    - telegraf_cluster_aware | lower == 'true'
-    - not (ansible_facts.services | map('quote') | join(',') | regex_search('pacemaker'))
+  - telegraf_cluster_aware | lower == 'true'
+  - not (ansible_facts.services | map('quote') | join(',') | regex_search('pacemaker'))
   fail: msg="Pacemaker service not found - Cannot configure it"
 
 - name: Pre-Install | APT-based
   when: ansible_os_family | lower == 'debian'
   block:
-    - when:
-        - telegraf_http_proxy != None
-        - telegraf_http_proxy | length > 0
-      block:
-        - name: Pre-Install | Get key using a proxy
-          notify: cleanup /tmp/influx.key
-          get_url:
-            use_proxy: yes
-            url: "{{ telegraf_repo_key_url }}"
-            dest: /tmp/influx.key
-          environment:
-            http_proxy: "{{ telegraf_http_proxy }}"
-            https_proxy: "{{ telegraf_http_proxy }}"
+  - name: Pre-Install | Get repo key
+    when: ansible_os_family | lower == 'debian'
+    apt_key:
+      url: '{{ telegraf_repo_key_url }}'
+      state: present
+    environment:
+      http_proxy: '{% if telegraf_http_proxy != None and telegraf_http_proxy | length > 0 %}{{ telegraf_http_proxy }}{% endif %}'
+      https_proxy: '{% if telegraf_https_proxy != None and telegraf_https_proxy | length > 0 %}{{ telegraf_https_proxy }}{% endif %}'
 
-        - name: Pre-Install | Get repo key
-          apt_key:
-            data: "{{ lookup('file', '/tmp/influx.key') }}"
-            state: present
-
-    - when: telegraf_http_proxy == None or telegraf_http_proxy | length == 0
-      block:
-        - name: Pre-Install | Get repo key
-          apt_key:
-            url: "{{ telegraf_repo_key_url }}"
-            state: present
-
-    - name: Pre-Install | Create apt repo
-      apt_repository:
-        repo: "{{ telegraf_repo_apt_url }}"
-        state: present
+  - name: Pre-Install | Create apt repo
+    apt_repository:
+      repo: '{{ telegraf_repo_apt_url }}'
+      state: present
 
 - name: Pre-Install | RPM-based
   when: ansible_os_family | lower == 'redhat'
   block:
-    - name: Pre-Install | Create yum repo (using proxy)
-      when:
-        - telegraf_http_proxy != None
-        - telegraf_http_proxy | length > 0
-      yum_repository:
-        name: telegraf
-        description: telegraf repo
-        baseurl: "{{ telegraf_repo_rpm_url }}"
-        gpgkey: "{{ telegraf_repo_key_url }}"
-        proxy: "{{ telegraf_http_proxy }}"
-
-    - name: Pre-Install | Create yum repo (without proxy)
-      when: telegraf_http_proxy == None or telegraf_http_proxy | length == 0
-      yum_repository:
-        name: telegraf
-        description: telegraf repo
-        baseurl: "{{ telegraf_repo_rpm_url }}"
-        gpgkey: "{{ telegraf_repo_key_url }}"
+  - name: Pre-Install | Create yum repo (using proxy)
+    yum_repository:
+      name: telegraf
+      description: telegraf repo
+      baseurl: '{{ telegraf_repo_rpm_url }}'
+      gpgkey: '{{ telegraf_repo_key_url }}'
+      proxy: '{% if telegraf_http_proxy != None and telegraf_http_proxy | length > 0 %}{{ telegraf_http_proxy }}{% endif %}'
 
 - name: Pre-Install | Set local fact - Configure firewalld
   when:
-    - ansible_facts.services | map('quote') | join(',') | regex_search('firewalld')
+  - ansible_facts.services | map('quote') | join(',') | regex_search('firewalld')
   set_fact:
     use_firewalld: true
 
 - name: Pre-Install | Get Consul details
   when:
-    - telegraf_config_consul | lower == 'true'
-    - ansible_facts.services | map('quote') | join(',') | regex_search('consul')
+  - telegraf_config_consul | lower == 'true'
+  - ansible_facts.services | map('quote') | join(',') | regex_search('consul')
   block:
-    - name: Pre-Install | Get Consul service details
-      systemd: name=consul
-      register: consul_systemd
+  - name: Pre-Install | Get Consul service details
+    systemd: name=consul
+    register: consul_systemd
 
-    - name: Pre-Install | Set Consul facts
-      set_fact:
-        consul_bin: "{{ consul_systemd.status.ExecStart | regex_replace('^.+path=(.+?)\\s+.+?$','\\1') }}"
-        configure_consul: true
+  - name: Pre-Install | Set Consul facts
+    set_fact:
+      consul_bin: "{{ consul_systemd.status.ExecStart | regex_replace('^.+path=(.+?)\\s+.+?$','\\1') }}"
+      configure_consul: true
 
 - name: Pre-Install | Cluster-aware facts
   when: telegraf_cluster_aware | lower == 'true'
   block:
-    - name: Pre-Install | Get crm node name
-      command: crm_node -n
-      register: crm_result
+  - name: Pre-Install | Get crm node name
+    command: crm_node -n
+    register: crm_result
 
-    - name: Pre-Install | Set cluster facts
-      set_fact:
-        crm_node_name: "{{ crm_result.stdout }}"
+  - name: Pre-Install | Set cluster facts
+    set_fact:
+      crm_node_name: '{{ crm_result.stdout }}'
