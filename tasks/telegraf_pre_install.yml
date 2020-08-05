@@ -39,12 +39,21 @@
   when: ansible_os_family | lower == 'redhat'
   block:
   - name: Pre-Install | Create yum repo (using proxy)
+    when:
+    - telegraf_http_proxy != None
+    - telegraf_http_proxy | length > 0
     yum_repository:
       name: telegraf
       description: telegraf repo
       baseurl: '{{ telegraf_repo_rpm_url }}'
       gpgkey: '{{ telegraf_repo_key_url }}'
-      proxy: '{% if telegraf_http_proxy != None and telegraf_http_proxy | length > 0 %}{{ telegraf_http_proxy }}{% endif %}'
+      proxy: '{{ telegraf_http_proxy }}'
+  - name: Pre-Install | Create yum repo (without proxy)
+    yum_repository:
+      name: telegraf
+      description: telegraf repo
+      baseurl: '{{ telegraf_repo_rpm_url }}'
+      gpgkey: '{{ telegraf_repo_key_url }}'
 
 - name: Pre-Install | Set local fact - Configure firewalld
   when:
