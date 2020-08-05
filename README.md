@@ -89,7 +89,7 @@ Use InfluxDB v2:
       roles:
          - ansible-telegraf
       vars:
-         telegraf_output_influxdbv2_config
+         telegraf_output_influxdbv2_config:
              urls: ["http://localhost:8086"]
              token: "secret" 
              org: "my-org"
