@@ -49,6 +49,8 @@
       gpgkey: '{{ telegraf_repo_key_url }}'
       proxy: '{{ telegraf_http_proxy }}'
   - name: Pre-Install | Create yum repo (without proxy)
+    when:
+    - telegraf_http_proxy == None or telegraf_http_proxy | length == 0
     yum_repository:
       name: telegraf
       description: telegraf repo
